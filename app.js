@@ -1,30 +1,30 @@
 (() => {
   "use strict";
 
-  // --- Constantes & état ------------------------------------------------
-  const RING_CIRCUMFERENCE = 2 * Math.PI * 110; // r=110 dans le SVG
+  // --- Constants & state ------------------------------------------------
+  const RING_CIRCUMFERENCE = 2 * Math.PI * 110; // r=110 in the SVG
   const STORE_KEY = "pomodoro.state.v1";
 
   const defaults = {
     cfg: { focus: 25, short: 5, long: 15, interval: 4, auto: false, sound: true },
     mode: "focus",
-    cycle: 1,                  // numéro du cycle de focus en cours
-    completedFocus: 0,         // total de sessions focus terminées
-    focusMinutes: 0,           // total de minutes concentrées
+    cycle: 1,                  // current focus round number
+    completedFocus: 0,         // total completed focus sessions
+    focusMinutes: 0,           // total focused minutes
     history: {},               // { "YYYY-MM-DD": { sessions, minutes } }
-    histRange: 7,              // fenêtre affichée : 7 ou 30 jours
+    histRange: 7,              // window shown: 7 or 30 days
     tasks: [],                 // { id, text, done, pomos }
     activeTaskId: null,
     theme: "light",
   };
 
   let state = load();
-  let remaining = minutesFor(state.mode) * 60; // secondes restantes
+  let remaining = minutesFor(state.mode) * 60; // seconds remaining
   let total = remaining;
   let ticking = false;
   let intervalId = null;
 
-  // --- Éléments DOM -----------------------------------------------------
+  // --- DOM elements -----------------------------------------------------
   const $ = (id) => document.getElementById(id);
   const els = {
     time: $("time"),
@@ -58,7 +58,7 @@
 
   els.ringFg.style.strokeDasharray = RING_CIRCUMFERENCE;
 
-  // --- Persistance ------------------------------------------------------
+  // --- Persistence ------------------------------------------------------
   function load() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY));
@@ -76,7 +76,7 @@
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
   }
 
-  // --- Logique du minuteur ---------------------------------------------
+  // --- Timer logic ------------------------------------------------------
   function minutesFor(mode) {
     return mode === "focus" ? state.cfg.focus
       : mode === "short" ? state.cfg.short
@@ -103,7 +103,7 @@
   }
   function pause() {
     ticking = false;
-    els.startBtn.textContent = "Démarrer";
+    els.startBtn.textContent = "Start";
     clearInterval(intervalId);
   }
   function stop() {
@@ -116,7 +116,7 @@
   function tick() {
     remaining--;
     if (state.mode === "focus" && remaining >= 0) {
-      // on compte la minute concentrée à chaque minute pleine écoulée
+      // focused minutes are counted on each full elapsed minute
     }
     if (remaining <= 0) {
       remaining = 0;
@@ -135,16 +135,16 @@
     if (state.mode === "focus") {
       state.completedFocus++;
       state.focusMinutes += state.cfg.focus;
-      // journalise dans l'historique du jour
+      // log into today's history
       const day = todayKey();
       const h = state.history[day] || { sessions: 0, minutes: 0 };
       h.sessions++;
       h.minutes += state.cfg.focus;
       state.history[day] = h;
-      // crédite la tâche active
+      // credit the active task
       const t = state.tasks.find((x) => x.id === state.activeTaskId && !x.done);
       if (t) t.pomos++;
-      // choisit la pause suivante
+      // pick the next break
       const next = state.cycle % state.cfg.interval === 0 ? "long" : "short";
       state.cycle++;
       save();
@@ -178,7 +178,7 @@
     renderTimer();
   }
 
-  // --- Rendu ------------------------------------------------------------
+  // --- Rendering --------------------------------------------------------
   function todayKey(d = new Date()) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   }
@@ -193,11 +193,11 @@
     const txt = fmt(remaining);
     els.time.textContent = txt;
     els.roundLabel.textContent =
-      state.mode === "focus" ? `Cycle ${state.cycle}`
-      : state.mode === "short" ? "Pause courte" : "Pause longue";
+      state.mode === "focus" ? `Round ${state.cycle}`
+      : state.mode === "short" ? "Short break" : "Long break";
     const frac = total > 0 ? remaining / total : 0;
     els.ringFg.style.strokeDashoffset = RING_CIRCUMFERENCE * (1 - frac);
-    const label = state.mode === "focus" ? "Focus" : "Pause";
+    const label = state.mode === "focus" ? "Focus" : "Break";
     document.title = `${txt} · ${label} — Pomodoro`;
   }
 
@@ -218,9 +218,9 @@
       days.push({ key, date: d, ...h });
     }
     const max = Math.max(1, ...days.map((d) => d.minutes));
-    const weekdays = ["dim", "lun", "mar", "mer", "jeu", "ven", "sam"];
+    const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-    // état actif des boutons de plage
+    // active state of the range buttons
     els.histRanges.forEach((b) => b.classList.toggle("active", +b.dataset.range === range));
 
     els.histChart.classList.toggle("compact", compact);
@@ -234,7 +234,7 @@
       const bar = document.createElement("div");
       bar.className = "hist-bar";
       bar.style.height = `${Math.round((d.minutes / max) * 100)}%`;
-      // valeur affichée seulement en vue 7 jours (sinon trop dense)
+      // value shown only in the 7-day view (otherwise too dense)
       if (!compact && d.sessions > 0) {
         const v = document.createElement("span");
         v.className = "hist-val";
@@ -244,7 +244,7 @@
       barWrap.appendChild(bar);
       const lab = document.createElement("span");
       lab.className = "hist-day";
-      // 7 j : jour de semaine ; 30 j : numéro du jour tous les 5 jours + aujourd'hui
+      // 7 d: weekday name; 30 d: day number every 5 days + today
       if (!compact) lab.textContent = weekdays[d.date.getDay()];
       else if (idx % 5 === 0 || d.key === todayKey()) lab.textContent = d.date.getDate();
       col.append(barWrap, lab);
@@ -255,8 +255,8 @@
     const sumSess = days.reduce((a, d) => a + d.sessions, 0);
     const today = state.history[todayKey()] || { sessions: 0, minutes: 0 };
     els.histTotal.innerHTML =
-      `Aujourd'hui <b>${today.minutes} min · ${today.sessions} 🍅</b> · ` +
-      `${range} j : <b>${sumMin} min · ${sumSess} 🍅</b> · ` +
+      `Today <b>${today.minutes} min · ${today.sessions} 🍅</b> · ` +
+      `${range} d: <b>${sumMin} min · ${sumSess} 🍅</b> · ` +
       `total <b>${state.focusMinutes} min · ${state.completedFocus} 🍅</b>`;
   }
 
@@ -271,12 +271,12 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `pomodoro-historique-${todayKey()}.csv`;
+    a.download = `pomodoro-history-${todayKey()}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  // Analyse un CSV "date,sessions,minutes" -> { "YYYY-MM-DD": {sessions, minutes} }
+  // Parse a "date,sessions,minutes" CSV -> { "YYYY-MM-DD": {sessions, minutes} }
   function parseCSV(text) {
     const out = {};
     let ok = 0, bad = 0;
@@ -284,7 +284,7 @@
     for (const line of lines) {
       const cells = line.split(",").map((c) => c.trim());
       const [date, s, m] = cells;
-      if (!date || date.toLowerCase() === "date") continue; // en-tête ignoré
+      if (!date || date.toLowerCase() === "date") continue; // header ignored
       const sessions = parseInt(s, 10);
       const minutes = parseInt(m, 10);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(sessions) || isNaN(minutes) || sessions < 0 || minutes < 0) {
@@ -301,25 +301,25 @@
     const { data, ok, bad } = parseCSV(text);
     if (ok === 0) {
       alert(bad > 0
-        ? `Aucune ligne valide trouvée (${bad} ligne(s) ignorée(s)). Format attendu : date,sessions,minutes`
-        : "Le fichier est vide ou ne contient pas de données.");
+        ? `No valid rows found (${bad} row(s) ignored). Expected format: date,sessions,minutes`
+        : "The file is empty or contains no data.");
       return;
     }
     const conflicts = Object.keys(data).filter((k) => state.history[k]).length;
-    const msg = `Importer ${ok} jour(s) ?` +
-      (conflicts ? `\n${conflicts} date(s) déjà présente(s) seront remplacées.` : "") +
-      (bad ? `\n${bad} ligne(s) invalide(s) seront ignorées.` : "");
+    const msg = `Import ${ok} day(s)?` +
+      (conflicts ? `\n${conflicts} existing date(s) will be replaced.` : "") +
+      (bad ? `\n${bad} invalid row(s) will be ignored.` : "");
     if (!confirm(msg)) return;
 
-    // fusion : les dates importées écrasent les mêmes dates
+    // merge: imported dates overwrite the same dates
     state.history = { ...state.history, ...data };
-    // recalcule les totaux à partir de l'historique fusionné
+    // recompute totals from the merged history
     state.completedFocus = Object.values(state.history).reduce((a, d) => a + d.sessions, 0);
     state.focusMinutes = Object.values(state.history).reduce((a, d) => a + d.minutes, 0);
     save();
     renderStats();
     renderHistory();
-    alert(`Import terminé : ${ok} jour(s) chargé(s).`);
+    alert(`Import complete: ${ok} day(s) loaded.`);
   }
 
   function renderTasks() {
@@ -342,7 +342,7 @@
       const label = document.createElement("span");
       label.className = "label";
       label.textContent = t.text;
-      label.title = "Cliquer pour définir comme tâche en cours";
+      label.title = "Click to set as the current task";
       label.addEventListener("click", () => {
         if (t.done) return;
         state.activeTaskId = state.activeTaskId === t.id ? null : t.id;
@@ -357,7 +357,7 @@
       const del = document.createElement("button");
       del.className = "del";
       del.textContent = "✕";
-      del.title = "Supprimer";
+      del.title = "Delete";
       del.addEventListener("click", () => {
         state.tasks = state.tasks.filter((x) => x.id !== t.id);
         if (state.activeTaskId === t.id) state.activeTaskId = null;
@@ -384,7 +384,7 @@
     els.themeBtn.textContent = state.theme === "dark" ? "☀️" : "🌙";
   }
 
-  // --- Son & notification ----------------------------------------------
+  // --- Sound & notification ---------------------------------------------
   let audioCtx = null;
   function beep() {
     try {
@@ -404,17 +404,17 @@
         o.start(t0);
         o.stop(t0 + 0.18);
       });
-    } catch { /* audio indisponible */ }
+    } catch { /* audio unavailable */ }
   }
 
   function notify() {
-    const msg = state.mode === "focus" ? "Session terminée ! Faites une pause ☕" : "Pause finie, au travail 💪";
+    const msg = state.mode === "focus" ? "Session complete! Take a break ☕" : "Break over, back to work 💪";
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification("Pomodoro", { body: msg });
     }
   }
 
-  // --- Événements -------------------------------------------------------
+  // --- Events -----------------------------------------------------------
   els.startBtn.addEventListener("click", () => {
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission();
@@ -450,7 +450,7 @@
     const reader = new FileReader();
     reader.onload = () => importCSV(String(reader.result));
     reader.readAsText(file);
-    e.target.value = ""; // permet de réimporter le même fichier
+    e.target.value = ""; // allow re-importing the same file
   });
 
   els.clearDoneBtn.addEventListener("click", () => {
@@ -476,13 +476,13 @@
       if (isNum) el.value = state.cfg[key];
       save();
       if (!ticking && (key === state.mode || ["focus", "short", "long"].includes(key))) {
-        // resynchronise l'horloge si on modifie la durée du mode courant
+        // resync the clock if the current mode's duration changes
         if (key === state.mode) reset();
       }
     });
   }
 
-  // Espace = play/pause (hors saisie de texte)
+  // Space = play/pause (outside text input)
   document.addEventListener("keydown", (e) => {
     if (e.code === "Space" && e.target.tagName !== "INPUT") {
       e.preventDefault();
@@ -490,7 +490,7 @@
     }
   });
 
-  // --- Initialisation ---------------------------------------------------
+  // --- Initialization ---------------------------------------------------
   applyTheme();
   renderConfigInputs();
   setMode(state.mode, { resetClock: true });
