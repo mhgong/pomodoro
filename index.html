@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pomodoro · Focus</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="app" id="app">
+    <header class="topbar">
+      <h1>🍅 Pomodoro</h1>
+      <button id="themeBtn" class="ghost" title="Changer le thème">🌙</button>
+    </header>
+
+    <!-- Onglets de mode -->
+    <nav class="modes" role="tablist">
+      <button class="mode active" data-mode="focus" role="tab">Focus</button>
+      <button class="mode" data-mode="short" role="tab">Pause courte</button>
+      <button class="mode" data-mode="long" role="tab">Pause longue</button>
+    </nav>
+
+    <!-- Minuteur -->
+    <section class="timer-card">
+      <svg class="ring" viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="ring-bg" cx="120" cy="120" r="110" />
+        <circle class="ring-fg" id="ringFg" cx="120" cy="120" r="110" />
+      </svg>
+      <div class="timer-inner">
+        <div class="time" id="time">25:00</div>
+        <div class="round" id="roundLabel">Cycle 1</div>
+      </div>
+    </section>
+
+    <div class="controls">
+      <button id="startBtn" class="primary">Démarrer</button>
+      <button id="resetBtn" class="ghost">Réinitialiser</button>
+      <button id="skipBtn" class="ghost">Passer ⏭</button>
+    </div>
+
+    <!-- Statistiques rapides -->
+    <section class="stats">
+      <div><strong id="statSessions">0</strong><span>focus terminés</span></div>
+      <div><strong id="statMinutes">0</strong><span>minutes concentré</span></div>
+    </section>
+
+    <!-- Historique -->
+    <section class="history">
+      <div class="history-head">
+        <h2>Historique</h2>
+        <div class="hist-controls">
+          <button class="hist-range active" data-range="7">7 j</button>
+          <button class="hist-range" data-range="30">30 j</button>
+          <button id="exportBtn" class="ghost small" title="Exporter l'historique en CSV">⬇ CSV</button>
+          <button id="importBtn" class="ghost small" title="Importer un historique depuis un CSV">⬆ CSV</button>
+          <input id="importFile" type="file" accept=".csv,text/csv" hidden />
+        </div>
+      </div>
+      <div id="histChart" class="hist-chart"></div>
+      <p id="histTotal" class="hist-total"></p>
+    </section>
+
+    <!-- Tâches -->
+    <section class="tasks">
+      <div class="tasks-head">
+        <h2>Tâches</h2>
+        <button id="clearDoneBtn" class="ghost small">Effacer terminées</button>
+      </div>
+      <form id="taskForm" class="task-form">
+        <input id="taskInput" type="text" placeholder="Ajouter une tâche…" autocomplete="off" maxlength="120" />
+        <button type="submit" class="primary small">Ajouter</button>
+      </form>
+      <ul id="taskList" class="task-list"></ul>
+      <p id="emptyHint" class="hint">Aucune tâche pour l'instant. Ajoutez-en une pour démarrer 👆</p>
+    </section>
+
+    <!-- Réglages -->
+    <details class="settings">
+      <summary>⚙️ Réglages</summary>
+      <div class="settings-grid">
+        <label>Focus (min)<input id="cfgFocus" type="number" min="1" max="90" value="25" /></label>
+        <label>Pause courte<input id="cfgShort" type="number" min="1" max="30" value="5" /></label>
+        <label>Pause longue<input id="cfgLong" type="number" min="1" max="60" value="15" /></label>
+        <label>Cycles avant pause longue<input id="cfgInterval" type="number" min="2" max="8" value="4" /></label>
+        <label class="check"><input id="cfgAuto" type="checkbox" /> Enchaîner automatiquement</label>
+        <label class="check"><input id="cfgSound" type="checkbox" checked /> Son de fin</label>
+      </div>
+    </details>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
