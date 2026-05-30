@@ -1,35 +1,35 @@
 # 🍅 Pomodoro · Focus
 
-Un minuteur Pomodoro avec suivi de tâches, en HTML/CSS/JS pur — aucune dépendance, aucune installation.
+A Pomodoro timer with task tracking, in pure HTML/CSS/JS — no dependencies, no installation.
 
-## Lancer
+## Run
 
-Ouvrez simplement `index.html` dans un navigateur, ou servez le dossier :
+Just open `index.html` in a browser, or serve the folder:
 
 ```bash
 cd pomodoro
 python3 -m http.server 4173
-# puis ouvrir http://localhost:4173
+# then open http://localhost:4173
 ```
 
-## Fonctionnalités
+## Features
 
-- **Trois modes** : Focus (25 min), pause courte (5 min), pause longue (15 min).
-- **Anneau de progression** animé et compte à rebours, titre d'onglet mis à jour en direct.
-- **Tâches** : ajout, validation, suppression, et la tâche « active » reçoit un 🍅 à chaque focus terminé.
-- **Statistiques** : nombre de sessions focus terminées et minutes cumulées.
-- **Historique** : graphique sur **7 ou 30 jours** (basculable), nombre de 🍅 et minutes par jour, plus totaux du jour / de la fenêtre / cumulé.
-- **Export CSV** : bouton « ⬇ CSV » qui télécharge tout l'historique (`date,sessions,minutes`) — pratique comme sauvegarde durable.
-- **Import CSV** : bouton « ⬆ CSV » qui recharge un historique exporté. Fusion par date (les dates importées remplacent les existantes), lignes invalides ignorées, totaux recalculés automatiquement.
-- **Réglages** : durées personnalisables, nombre de cycles avant la pause longue, enchaînement auto, son de fin.
-- **Confort** : thème clair/sombre, son de fin (Web Audio), notifications navigateur, `Espace` pour démarrer/mettre en pause.
+- **Three modes**: Focus (25 min), short break (5 min), long break (15 min).
+- **Animated progress ring** and countdown, with the tab title updated live.
+- **Tasks**: add, complete, delete, and the "active" task earns a 🍅 each time a focus session finishes.
+- **Statistics**: number of completed focus sessions and cumulative minutes.
+- **History**: chart over **7 or 30 days** (toggleable), number of 🍅 and minutes per day, plus today / window / all-time totals.
+- **CSV export**: a "⬇ CSV" button that downloads the full history (`date,sessions,minutes`) — handy as a durable backup.
+- **CSV import**: a "⬆ CSV" button that reloads an exported history. Merge by date (imported dates replace existing ones), invalid rows ignored, totals recomputed automatically.
+- **Settings**: customizable durations, number of rounds before the long break, auto-start, end sound.
+- **Comfort**: light/dark theme, end sound (Web Audio), browser notifications, `Space` to start/pause.
 
-## Où sont stockées les données ?
+## Where is the data stored?
 
-Tout est dans le `localStorage` du navigateur : les données **persistent** entre les sessions et redémarrages, mais restent liées à **ce navigateur + cette adresse (origine)**. Elles sont perdues si vous videz les données du site, changez de navigateur/appareil, ou utilisez le mode privé. Pour une sauvegarde durable, exportez en CSV.
+Everything lives in the browser's `localStorage`: the data **persists** across sessions and restarts, but stays tied to **this browser + this address (origin)**. It is lost if you clear the site's data, switch browser/device, or use private mode. For a durable backup, export to CSV.
 
-## Fichiers
+## Files
 
 - `index.html` — structure
-- `style.css` — styles + thème clair/sombre
-- `app.js` — toute la logique (minuteur, tâches, persistance)
+- `style.css` — styles + light/dark theme
+- `app.js` — all the logic (timer, tasks, persistence)
